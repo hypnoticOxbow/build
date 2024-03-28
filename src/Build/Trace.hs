@@ -19,7 +19,6 @@ module Build.Trace (
 
 import Build.Store
 
-import Control.Monad.Extra
 import Data.List (sortOn)
 import Data.Maybe
 import Data.Ord
@@ -42,6 +41,13 @@ newtype VT k v = VT [Trace k v (Hash v)] deriving (Monoid, Semigroup, Show)
 -- the hashes of up-to-date values by using @fetchHash@.
 recordVT :: k -> Hash v -> [(k, Hash v)] -> VT k v -> VT k v
 recordVT key valueHash deps (VT ts) = VT $ Trace key deps valueHash : ts
+
+
+andM :: Monad m => [m Bool] -> m Bool
+andM = fmap and . sequence
+
+anyM :: Monad m => (a -> m Bool) -> [a] -> m Bool
+anyM f = fmap or . mapM f
 
 -- | Given a function to compute the hash of a key's current value,
 -- a @key@, and a set of verifying traces, return 'True' if the @key@ is
